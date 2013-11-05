@@ -48,9 +48,6 @@ if ([[HDKSession sharedSession] isAuthenticated]) {
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
         // error calling the API
     }];
-} else {
-    HDKSignInViewController *signInViewController = [[HDKSignInViewController alloc] initWithDelegate:self];
-    [self presentViewController:signInViewController animated:YES completion:nil];
 }
 ```
 
