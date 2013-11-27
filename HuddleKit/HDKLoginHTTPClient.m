@@ -36,10 +36,10 @@ static NSString *_redirectUrl;
         [self setDefaultHeader:@"X-Client-App" value:_clientId];
         __weak HDKLoginHTTPClient *weakSelf = self;
         [self setReachabilityStatusChangeBlock:^(AFNetworkReachabilityStatus status) {
-            weakSelf.operationQueue.suspended = (status == AFNetworkReachabilityStatusNotReachable);
+            weakSelf.operationQueue.suspended = (status == AFNetworkReachabilityStatusNotReachable) || (status == AFNetworkReachabilityStatusUnknown);
         }];
     }
-    
+
     return self;
 }
 

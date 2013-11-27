@@ -40,7 +40,7 @@ NSString * const HDKInvalidRefreshTokenNotification = @"HDKInvalidRefreshTokenNo
         [self setAuthorizationHeaderWithToken:[[HDKSession sharedSession] accessToken]];
         __weak HDKHTTPClient *weakSelf = self;
         [self setReachabilityStatusChangeBlock:^(AFNetworkReachabilityStatus status) {
-            weakSelf.operationQueue.suspended = (status == AFNetworkReachabilityStatusNotReachable);
+            weakSelf.operationQueue.suspended = (status == AFNetworkReachabilityStatusNotReachable) || (status == AFNetworkReachabilityStatusUnknown);
         }];
     }
 
