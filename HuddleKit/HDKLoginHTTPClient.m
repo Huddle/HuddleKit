@@ -15,8 +15,7 @@ static NSString *_redirectUrl;
 
 @implementation HDKLoginHTTPClient
 
-+ (HDKLoginHTTPClient *)sharedClient
-{
++ (HDKLoginHTTPClient *)sharedClient {
     static HDKLoginHTTPClient *_sharedClient = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
@@ -26,8 +25,7 @@ static NSString *_redirectUrl;
     return _sharedClient;
 }
 
-- (id)init
-{
+- (id)init {
     self = [super initWithBaseURL:[NSURL URLWithString:_loginBaseUrl]];
     if (self != nil) {
         [self registerHTTPOperationClass:[HDKAFJSONRequestOperation class]];
@@ -45,37 +43,31 @@ static NSString *_redirectUrl;
 
 #pragma mark - Class methods
 
-+ (void)setLoginBaseUrl:(NSString *)loginBaseUrl
-{
++ (void)setLoginBaseUrl:(NSString *)loginBaseUrl {
     _loginBaseUrl = loginBaseUrl;
 }
 
-+ (void)setClientId:(NSString *)clientId
-{
++ (void)setClientId:(NSString *)clientId {
     _clientId = clientId;
 }
 
-+ (void)setRedirectUrl:(NSString *)redirectUrl
-{
++ (void)setRedirectUrl:(NSString *)redirectUrl {
     _redirectUrl = redirectUrl;
 }
 
-+ (NSString *)redirectUrl
-{
++ (NSString *)redirectUrl {
     return _redirectUrl;
 }
 
 #pragma mark - Instance methods
 
-- (NSString *)loginPageUrl
-{
+- (NSString *)loginPageUrl {
     return [NSString stringWithFormat:@"%@/request?response_type=code&client_id=%@&redirect_uri=%@", _loginBaseUrl, _clientId,  _redirectUrl];
 }
 
 - (void)signInWithAuthorizationCode:(NSString *)code
                             success:(void (^)(AFHTTPRequestOperation *operation, id responseObject))success
-                            failure:(void (^)(AFHTTPRequestOperation *operation, NSError *error))failure
-{
+                            failure:(void (^)(AFHTTPRequestOperation *operation, NSError *error))failure {
     NSDictionary *parameters = @
     {
         @"grant_type" : @"authorization_code",
@@ -88,8 +80,7 @@ static NSString *_redirectUrl;
 }
 
 - (void)refreshAccessTokenWithSuccess:(void (^)(AFHTTPRequestOperation *operation, id responseObject))success
-                              failure:(void (^)(AFHTTPRequestOperation *operation, NSError *error))failure
-{
+                              failure:(void (^)(AFHTTPRequestOperation *operation, NSError *error))failure {
     NSDictionary *parameters = @
     {
         @"grant_type" : @"refresh_token",
@@ -104,8 +95,7 @@ static NSString *_redirectUrl;
 
 - (void)postTokenWithParameters:(NSDictionary *)parameters
                         success:(void (^)(AFHTTPRequestOperation *operation, id responseObject))success
-                        failure:(void (^)(AFHTTPRequestOperation *operation, NSError *error))failure
-{
+                        failure:(void (^)(AFHTTPRequestOperation *operation, NSError *error))failure {
     [self postPath:@"/token" parameters:parameters success:^(AFHTTPRequestOperation *operation, id responseObject) {
         NSString *accessToken = responseObject[@"access_token"];
         NSString *refreshToken = responseObject[@"refresh_token"];

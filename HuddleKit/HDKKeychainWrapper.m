@@ -7,48 +7,41 @@
 
 #import "HDKKeychainWrapper.h"
 
-NSString * const kHDKKeychainAccessTokenKey = @"AccessToken";
-NSString * const kHDKKeychainRefreshTokenKey = @"RefreshToken";
-NSString * const kHDKKeychainService = @"net.huddle.HuddleKit";
+NSString *const kHDKKeychainAccessTokenKey = @"AccessToken";
+NSString *const kHDKKeychainRefreshTokenKey = @"RefreshToken";
+NSString *const kHDKKeychainService = @"net.huddle.HuddleKit";
 static NSString *_accessGroup;
 
 @implementation HDKKeychainWrapper
 
 #pragma mark - Class methods
 
-+ (NSString *)accessToken
-{
++ (NSString *)accessToken {
     return [self stringForKey:kHDKKeychainAccessTokenKey];
 }
 
-+ (void)setAccessToken:(NSString *)accessToken
-{
++ (void)setAccessToken:(NSString *)accessToken {
     [self setString:accessToken forKey:kHDKKeychainAccessTokenKey];
 }
 
-+ (NSString *)refreshToken
-{
++ (NSString *)refreshToken {
     return [self stringForKey:kHDKKeychainRefreshTokenKey];
 }
 
-+ (void)setRefreshToken:(NSString *)refreshToken
-{
++ (void)setRefreshToken:(NSString *)refreshToken {
     [self setString:refreshToken forKey:kHDKKeychainRefreshTokenKey];
 }
 
-+ (void)setKeychainAccessGroup:(NSString *)accessGroup;
-{
++ (void)setKeychainAccessGroup:(NSString *)accessGroup; {
     _accessGroup = accessGroup;
 }
 
-+ (void)reset
-{
++ (void)reset {
     [self removeItemForKey:kHDKKeychainAccessTokenKey service:kHDKKeychainService accessGroup:_accessGroup];
     [self removeItemForKey:kHDKKeychainRefreshTokenKey service:kHDKKeychainService accessGroup:_accessGroup];
 }
 
-+ (NSString *)stringForKey:(NSString *)key
-{
++ (NSString *)stringForKey:(NSString *)key {
     NSData *data = [self dataForKey:key service:kHDKKeychainService accessGroup:_accessGroup];
     if (data) {
         return [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
@@ -57,8 +50,7 @@ static NSString *_accessGroup;
     return nil;
 }
 
-+ (void)setString:(NSString *)value forKey:(NSString *)key
-{
++ (void)setString:(NSString *)value forKey:(NSString *)key {
     if (!value) {
         [self removeItemForKey:key service:kHDKKeychainService accessGroup:_accessGroup];
         return;
@@ -70,8 +62,7 @@ static NSString *_accessGroup;
 
 #pragma mark - Private class methods
 
-+ (NSData *)dataForKey:(NSString *)key service:(NSString *)service accessGroup:(NSString *)accessGroup
-{
++ (NSData *)dataForKey:(NSString *)key service:(NSString *)service accessGroup:(NSString *)accessGroup {
     if (!key) {
         return nil;
     }
@@ -98,8 +89,7 @@ static NSString *_accessGroup;
     return (__bridge_transfer NSData *)data;
 }
 
-+ (void)setData:(NSData *)data forKey:(NSString *)key service:(NSString *)service accessGroup:(NSString *)accessGroup
-{
++ (void)setData:(NSData *)data forKey:(NSString *)key service:(NSString *)service accessGroup:(NSString *)accessGroup {
     if (!key) {
         return;
     }
@@ -142,8 +132,7 @@ static NSString *_accessGroup;
     }
 }
 
-+ (BOOL)removeItemForKey:(NSString *)key service:(NSString *)service accessGroup:(NSString *)accessGroup
-{
++ (BOOL)removeItemForKey:(NSString *)key service:(NSString *)service accessGroup:(NSString *)accessGroup {
     if (!key) {
         return NO;
     }

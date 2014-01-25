@@ -10,14 +10,12 @@
 
 @implementation HuddleKit
 
-+ (void)setClientId:(NSString *)clientId
-{
++ (void)setClientId:(NSString *)clientId {
     [HDKHTTPClient setClientId:clientId];
     [HDKLoginHTTPClient setClientId:clientId];
 }
 
-+ (void)setRedirectUrl:(NSString *)redirectUrl
-{
++ (void)setRedirectUrl:(NSString *)redirectUrl {
     [HDKLoginHTTPClient setRedirectUrl:redirectUrl];
 }
 

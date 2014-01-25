@@ -12,13 +12,12 @@
 
 static NSString *_apiBaseUrl = @"https://api.huddle.net";
 static NSString *_clientId;
-NSString * const HDKUserAccessGrantRevokedNotification = @"HDKUserAccessGrantRevokedNotification";
-NSString * const HDKInvalidRefreshTokenNotification = @"HDKInvalidRefreshTokenNotification";
+NSString *const HDKUserAccessGrantRevokedNotification = @"HDKUserAccessGrantRevokedNotification";
+NSString *const HDKInvalidRefreshTokenNotification = @"HDKInvalidRefreshTokenNotification";
 
 @implementation HDKHTTPClient
 
-+ (HDKHTTPClient *)sharedClient
-{
++ (HDKHTTPClient *)sharedClient {
     static HDKHTTPClient *_sharedClient = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
@@ -28,8 +27,7 @@ NSString * const HDKInvalidRefreshTokenNotification = @"HDKInvalidRefreshTokenNo
     return _sharedClient;
 }
 
-- (id)initWithBaseURL:(NSURL *)url
-{
+- (id)initWithBaseURL:(NSURL *)url {
     self = [super initWithBaseURL:url];
     if (self != nil) {
         [self registerHTTPOperationClass:[HDKAFJSONRequestOperation class]];
@@ -49,13 +47,11 @@ NSString * const HDKInvalidRefreshTokenNotification = @"HDKInvalidRefreshTokenNo
 
 #pragma mark - Class methods
 
-+ (void)setApiBaseUrl:(NSString *)apiBaseUrl
-{
++ (void)setApiBaseUrl:(NSString *)apiBaseUrl {
     _apiBaseUrl = apiBaseUrl;
 }
 
-+ (void)setClientId:(NSString *)clientId
-{
++ (void)setClientId:(NSString *)clientId {
     _clientId = clientId;
 }
 
@@ -63,8 +59,7 @@ NSString * const HDKInvalidRefreshTokenNotification = @"HDKInvalidRefreshTokenNo
 
 - (AFHTTPRequestOperation *)HTTPRequestOperationWithRequest:(NSURLRequest *)urlRequest
                                                     success:(void (^)(AFHTTPRequestOperation *operation, id responseObject))success
-                                                    failure:(void (^)(AFHTTPRequestOperation *operation, NSError *error))failure
-{
+                                                    failure:(void (^)(AFHTTPRequestOperation *operation, NSError *error))failure {
     void (^refreshTokenFailure)(AFHTTPRequestOperation *operation, NSError *error) = ^(AFHTTPRequestOperation *operation, NSError *error) {
         BOOL isAnApiV1AuthenticationError = [self isAnApiV1AuthenticationError:operation];
         NSString *authFailHeader = [[operation response] allHeaderFields][@"Www-Authenticate"];
@@ -94,15 +89,13 @@ NSString * const HDKInvalidRefreshTokenNotification = @"HDKInvalidRefreshTokenNo
     return [super HTTPRequestOperationWithRequest:urlRequest success:success failure:refreshTokenFailure];
 }
 
-- (void)setAuthorizationHeaderWithToken:(NSString *)token
-{
+- (void)setAuthorizationHeaderWithToken:(NSString *)token {
     [self setDefaultHeader:@"Authorization" value:[NSString stringWithFormat:@"OAuth2 %@", token]];
 }
 
 #pragma mark - Private methods
 
-- (BOOL)isAnApiV1AuthenticationError:(AFHTTPRequestOperation *)operation
-{
+- (BOOL)isAnApiV1AuthenticationError:(AFHTTPRequestOperation *)operation {
     if ([[[[operation request] URL] path] hasPrefix:@"/v1"]) {
         if ([[operation response] statusCode] == 401) {
             return YES;
@@ -112,28 +105,23 @@ NSString * const HDKInvalidRefreshTokenNotification = @"HDKInvalidRefreshTokenNo
     return NO;
 }
 
-- (BOOL)isARevokedAccessGrantError:(AFHTTPRequestOperation *)operation
-{
+- (BOOL)isARevokedAccessGrantError:(AFHTTPRequestOperation *)operation {
     return [self operation:operation containsError:@"RevokedAccessGrant"];
 }
 
-- (void)postUserAccessGrantRevokedNotification
-{
+- (void)postUserAccessGrantRevokedNotification {
     [[NSNotificationCenter defaultCenter] postNotificationName:HDKUserAccessGrantRevokedNotification object:nil];
 }
 
-- (BOOL)isAnInvalidRefreshTokenError:(AFHTTPRequestOperation *)operation
-{
+- (BOOL)isAnInvalidRefreshTokenError:(AFHTTPRequestOperation *)operation {
     return [self operation:operation containsError:@"InvalidRefreshToken"];
 }
 
-- (void)postInvalidRefreshTokenNotification
-{
+- (void)postInvalidRefreshTokenNotification {
     [[NSNotificationCenter defaultCenter] postNotificationName:HDKInvalidRefreshTokenNotification object:nil];
 }
 
-- (BOOL)operation:(AFHTTPRequestOperation *)operation containsError:(NSString *)error
-{
+- (BOOL)operation:(AFHTTPRequestOperation *)operation containsError:(NSString *)error {
     HDKAFJSONRequestOperation *jsonRequestOperation = (HDKAFJSONRequestOperation *)operation;
     id responseJSON = [jsonRequestOperation responseJSON];
     NSString *errorURI = responseJSON[@"error_uri"];

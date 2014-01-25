@@ -11,8 +11,7 @@
 
 @implementation HDKSession
 
-+ (HDKSession *)sharedSession
-{
++ (HDKSession *)sharedSession {
     static HDKSession *_sharedSession = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
@@ -24,46 +23,38 @@
 
 #pragma mark - Properties
 
-- (NSString *)accessToken
-{
+- (NSString *)accessToken {
     return [HDKKeychainWrapper accessToken];
 }
 
-- (void)setAccessToken:(NSString *)accessToken
-{
+- (void)setAccessToken:(NSString *)accessToken {
     [HDKKeychainWrapper setAccessToken:accessToken];
 }
 
-- (NSString *)refreshToken
-{
+- (NSString *)refreshToken {
     return [HDKKeychainWrapper refreshToken];
 }
 
-- (void)setRefreshToken:(NSString *)refreshToken
-{
+- (void)setRefreshToken:(NSString *)refreshToken {
     [HDKKeychainWrapper setRefreshToken:refreshToken];
 }
 
 #pragma mark - Instance methods
 
-- (BOOL)isAuthenticated
-{
+- (BOOL)isAuthenticated {
     return self.accessToken != nil;
 }
 
-- (void)signOut
-{
+- (void)signOut {
     [HDKKeychainWrapper reset];
     [[HDKHTTPClient sharedClient] setAuthorizationHeaderWithToken:nil];
 }
 
-- (NSString *)stringForKey:(NSString *)key
-{
+- (NSString *)stringForKey:(NSString *)key {
     return [HDKKeychainWrapper stringForKey:key];
 }
 
-- (void)setString:(NSString *)value forKey:(NSString *)key
-{
+- (void)setString:(NSString *)value forKey:(NSString *)key {
     [HDKKeychainWrapper setString:value forKey:key];
 }
 

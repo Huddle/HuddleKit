@@ -9,8 +9,7 @@
 
 @implementation HDKAFJSONRequestOperation
 
-- (NSURLRequest *)connection:(NSURLConnection *)connection willSendRequest:(NSURLRequest *)request redirectResponse:(NSURLResponse *)response
-{
+- (NSURLRequest *)connection:(NSURLConnection *)connection willSendRequest:(NSURLRequest *)request redirectResponse:(NSURLResponse *)response {
     if (response) {
         NSMutableURLRequest *urlRequest = [[NSMutableURLRequest alloc] initWithURL:request.URL];
         [urlRequest setValue:[self.request valueForHTTPHeaderField:@"Authorization"] forHTTPHeaderField:@"Authorization"];

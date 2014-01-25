@@ -21,8 +21,7 @@
 
 @implementation HDKSignInViewController
 
-- (id)initWithDelegate:(id <HDKSignInViewControllerDelegate>)delegate
-{
+- (id)initWithDelegate:(id <HDKSignInViewControllerDelegate>)delegate {
     if (self = [super init]) {
         self.delegate = delegate;
 
@@ -39,13 +38,11 @@
     return self;
 }
 
-- (void)dealloc
-{
+- (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
-- (void)viewDidLoad
-{
+- (void)viewDidLoad {
     [super viewDidLoad];
 
     self.view.backgroundColor = [UIColor colorWithRed:0 green:0.537 blue:0.816 alpha:1.0];
@@ -126,8 +123,7 @@
     [self.view addSubview:noConnectionView];
 }
 
-- (void)viewDidAppear:(BOOL)animated
-{
+- (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
 
     [SVProgressHUD show];
@@ -135,8 +131,7 @@
     [self.reachability startNotifier];
 }
 
-- (void)viewDidDisappear:(BOOL)animated
-{
+- (void)viewDidDisappear:(BOOL)animated {
     [super viewDidAppear:animated];
 
     [self.webView stopLoading];
@@ -144,8 +139,7 @@
     [SVProgressHUD dismiss];
 }
 
-- (void)loadLoginPage
-{
+- (void)loadLoginPage {
     if ([SVProgressHUD isVisible] == NO) {
         [SVProgressHUD show];
     }
@@ -155,8 +149,7 @@
     [self.webView loadRequest:request];
 }
 
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
-{
+- (BOOL)shouldAutorotateToInterfaceOrientationFoo:(UIInterfaceOrientation)toInterfaceOrientation {
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
         return YES;
     } else {
@@ -164,8 +157,7 @@
     }
 }
 
-- (BOOL)shouldAutorotate
-{
+- (BOOL)shouldAutorotate {
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
         return YES;
     } else {
@@ -173,8 +165,7 @@
     }
 }
 
-- (NSUInteger)supportedInterfaceOrientations
-{
+- (NSUInteger)supportedInterfaceOrientations {
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
         return UIInterfaceOrientationMaskAll;
     } else {
@@ -184,8 +175,7 @@
 
 #pragma mark - UIWebViewDelegate
 
-- (void)webViewDidFinishLoad:(UIWebView *)webView
-{
+- (void)webViewDidFinishLoad:(UIWebView *)webView {
     [SVProgressHUD dismiss];
 
     if (webView.hidden) {
@@ -200,8 +190,7 @@
     [webView stringByEvaluatingJavaScriptFromString:@"document.body.style.webkitTouchCallout='none'; document.body.style.KhtmlUserSelect='none'"];
 }
 
-- (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType
-{
+- (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType {
     NSURL *url = request.URL;
 
     if (![url.scheme isEqual:@"http"] && ![url.scheme isEqual:@"https"]) {
@@ -234,8 +223,7 @@
     }
 }
 
-- (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error
-{
+- (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error {
     if ([error code] == 102) { // "Frame load interrupted"
         return;
     }
@@ -251,8 +239,7 @@
 
 #pragma mark - Private methods
 
-- (void)reachabilityChanged:(NSNotification *)notification
-{
+- (void)reachabilityChanged:(NSNotification *)notification {
     if (![self.reachability isReachable]) {
         [SVProgressHUD dismiss];
 
@@ -267,8 +254,7 @@
     }
 }
 
-- (void)fadeInView:(UIView *)view
-{
+- (void)fadeInView:(UIView *)view {
     view.alpha = 0.0f;
     view.hidden = NO;
     [UIView animateWithDuration:0.5 animations:^() {
@@ -276,8 +262,7 @@
     }];
 }
 
-- (void)fadeOutView:(UIView *)view
-{
+- (void)fadeOutView:(UIView *)view {
     view.alpha = 1.0f;
     [UIView animateWithDuration:0.5 animations:^() {
         view.alpha = 0.0f;

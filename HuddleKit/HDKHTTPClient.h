@@ -7,8 +7,8 @@
 
 #import "AFHTTPClient.h"
 
-extern NSString * const HDKUserAccessGrantRevokedNotification;
-extern NSString * const HDKInvalidRefreshTokenNotification;
+extern NSString *const HDKUserAccessGrantRevokedNotification;
+extern NSString *const HDKInvalidRefreshTokenNotification;
 
 @interface HDKHTTPClient : AFHTTPClient
 
