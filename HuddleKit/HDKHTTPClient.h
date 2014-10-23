@@ -17,4 +17,9 @@ extern NSString *const HDKInvalidRefreshTokenNotification;
 + (void)setApiBaseUrl:(NSString *)apiBaseUrl;
 + (void)setClientId:(NSString *)clientId;
 
+- (AFHTTPRequestOperation *)HTTPRequestOperationWithRequest:(NSURLRequest *)urlRequest
+                                                   filePath:(NSString *)filePath
+                                                    success:(void (^)(AFHTTPRequestOperation *operation, id responseObject))success
+                                                    failure:(void (^)(AFHTTPRequestOperation *operation, NSError *error))failure;
+
 @end

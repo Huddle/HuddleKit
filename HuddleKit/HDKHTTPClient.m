@@ -60,6 +60,13 @@ NSString *const HDKInvalidRefreshTokenNotification = @"HDKInvalidRefreshTokenNot
 - (AFHTTPRequestOperation *)HTTPRequestOperationWithRequest:(NSURLRequest *)urlRequest
                                                     success:(void (^)(AFHTTPRequestOperation *operation, id responseObject))success
                                                     failure:(void (^)(AFHTTPRequestOperation *operation, NSError *error))failure {
+    return [self HTTPRequestOperationWithRequest:urlRequest filePath:nil success:success failure:failure];
+}
+
+- (AFHTTPRequestOperation *)HTTPRequestOperationWithRequest:(NSURLRequest *)urlRequest
+                                                   filePath:(NSString *)filePath
+                                                    success:(void (^)(AFHTTPRequestOperation *operation, id responseObject))success
+                                                    failure:(void (^)(AFHTTPRequestOperation *operation, NSError *error))failure {
     void (^refreshTokenFailure)(AFHTTPRequestOperation *operation, NSError *error) = ^(AFHTTPRequestOperation *operation, NSError *error) {
         BOOL isAnApiV1AuthenticationError = [self isAnApiV1AuthenticationError:operation];
         NSString *authFailHeader = [[operation response] allHeaderFields][@"Www-Authenticate"];
@@ -69,7 +76,11 @@ NSString *const HDKInvalidRefreshTokenNotification = @"HDKInvalidRefreshTokenNot
                 [self setAuthorizationHeaderWithToken:accessToken];
                 NSMutableURLRequest *mutableUrlRequest = (NSMutableURLRequest *)urlRequest;
                 [mutableUrlRequest setValue:[self defaultValueForHeader:@"Authorization"] forHTTPHeaderField:@"Authorization"];
-                [self enqueueHTTPRequestOperation:[super HTTPRequestOperationWithRequest:mutableUrlRequest success:success failure:failure]];
+                AFHTTPRequestOperation *httpRequestOperation = [super HTTPRequestOperationWithRequest:mutableUrlRequest success:success failure:failure];
+                if (filePath) {
+                    httpRequestOperation.outputStream = [NSOutputStream outputStreamToFileAtPath:filePath append:NO];
+                }
+                [self enqueueHTTPRequestOperation:httpRequestOperation];
             } failure:^(AFHTTPRequestOperation *refreshOperation, NSError *refreshError) {
                 if ([self isARevokedAccessGrantError:refreshOperation]) {
                     [self postUserAccessGrantRevokedNotification];
