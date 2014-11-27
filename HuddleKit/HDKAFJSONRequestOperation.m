@@ -23,4 +23,8 @@
     }
 }
 
++ (NSSet *)acceptableContentTypes {
+    return [NSSet setWithObjects:@"application/json", @"text/json", @"text/javascript", @"application/vnd.huddle.data.v2+json", nil];
+}
+
 @end
