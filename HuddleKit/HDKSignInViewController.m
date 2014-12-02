@@ -132,7 +132,7 @@
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
-    [super viewDidAppear:animated];
+    [super viewDidDisappear:animated];
 
     [self.webView stopLoading];
     [self.reachability stopNotifier];
