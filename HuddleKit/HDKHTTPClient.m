@@ -71,9 +71,7 @@ NSString *const HDKInvalidRefreshTokenNotification = @"HDKInvalidRefreshTokenNot
         BOOL isAnApiV1AuthenticationError = [self isAnApiV1AuthenticationError:operation];
         NSString *authFailHeader = [[operation response] allHeaderFields][@"Www-Authenticate"];
         if ((authFailHeader && [authFailHeader rangeOfString:@"invalid_token"].location != NSNotFound) || isAnApiV1AuthenticationError) {
-            [[HDKLoginHTTPClient sharedClient] refreshAccessTokenWithSuccess:^(AFHTTPRequestOperation *refreshOperation, id responseObject) {
-                NSString *accessToken = responseObject[@"access_token"];
-                [self setAuthorizationHeaderWithToken:accessToken];
+            [self refreshAccessTokenWithSuccess:^(AFHTTPRequestOperation *refreshOperation, id responseObject) {
                 NSMutableURLRequest *mutableUrlRequest = (NSMutableURLRequest *)urlRequest;
                 [mutableUrlRequest setValue:[self defaultValueForHeader:@"Authorization"] forHTTPHeaderField:@"Authorization"];
                 AFHTTPRequestOperation *httpRequestOperation = [super HTTPRequestOperationWithRequest:mutableUrlRequest success:success failure:failure];
@@ -81,15 +79,7 @@ NSString *const HDKInvalidRefreshTokenNotification = @"HDKInvalidRefreshTokenNot
                     httpRequestOperation.outputStream = [NSOutputStream outputStreamToFileAtPath:filePath append:NO];
                 }
                 [self enqueueHTTPRequestOperation:httpRequestOperation];
-            } failure:^(AFHTTPRequestOperation *refreshOperation, NSError *refreshError) {
-                if ([self isARevokedAccessGrantError:refreshOperation]) {
-                    [self postUserAccessGrantRevokedNotification];
-                } else if ([self isAnInvalidRefreshTokenError:refreshOperation]) {
-                    [self postInvalidRefreshTokenNotification];
-                } else if (failure) {
-                    failure(refreshOperation, refreshError);
-                }
-            }];
+            } failure:failure];
         } else {
             if (failure) {
                 failure(operation, error);
@@ -98,6 +88,25 @@ NSString *const HDKInvalidRefreshTokenNotification = @"HDKInvalidRefreshTokenNot
     };
 
     return [super HTTPRequestOperationWithRequest:urlRequest success:success failure:refreshTokenFailure];
+}
+
+- (void)refreshAccessTokenWithSuccess:(void (^)(AFHTTPRequestOperation *operation, id responseObject))success
+                              failure:(void (^)(AFHTTPRequestOperation *operation, NSError *error))failure {
+    [[HDKLoginHTTPClient sharedClient] refreshAccessTokenWithSuccess:^(AFHTTPRequestOperation *refreshOperation, id responseObject) {
+        NSString *accessToken = responseObject[@"access_token"];
+        [self setAuthorizationHeaderWithToken:accessToken];
+        if (success) {
+            success(refreshOperation, responseObject);
+        }
+    } failure:^(AFHTTPRequestOperation *refreshOperation, NSError *refreshError) {
+        if ([self isARevokedAccessGrantError:refreshOperation]) {
+            [self postUserAccessGrantRevokedNotification];
+        } else if ([self isAnInvalidRefreshTokenError:refreshOperation]) {
+            [self postInvalidRefreshTokenNotification];
+        } else if (failure) {
+            failure(refreshOperation, refreshError);
+        }
+    }];
 }
 
 - (void)setAuthorizationHeaderWithToken:(NSString *)token {
