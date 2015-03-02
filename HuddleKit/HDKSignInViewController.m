@@ -149,7 +149,7 @@
     [self.webView loadRequest:request];
 }
 
-- (BOOL)shouldAutorotateToInterfaceOrientationFoo:(UIInterfaceOrientation)toInterfaceOrientation {
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation {
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
         return YES;
     } else {
