@@ -2,11 +2,10 @@
 //  HDKLoginHTTPClient.m
 //  HuddleKit
 //
-//  Copyright (c) 2014 Huddle. All rights reserved.
+//  Copyright (c) 2015 Huddle. All rights reserved.
 //
 
 #import "HDKLoginHTTPClient.h"
-#import "HDKAFJSONRequestOperation.h"
 #import "HDKSession.h"
 
 static NSString *_loginBaseUrl = @"https://login.huddle.net";
@@ -28,12 +27,9 @@ static NSString *_redirectUrl;
 - (id)init {
     self = [super initWithBaseURL:[NSURL URLWithString:_loginBaseUrl]];
     if (self != nil) {
-        [self registerHTTPOperationClass:[HDKAFJSONRequestOperation class]];
-        [self setDefaultHeader:@"Accept" value:@"application/json"];
-        [self setDefaultHeader:@"Content-Type" value:@"application/json"];
-        [self setDefaultHeader:@"X-Client-App" value:_clientId];
+        [self.requestSerializer setValue:_clientId forHTTPHeaderField:@"X-Client-App"];
         __weak HDKLoginHTTPClient *weakSelf = self;
-        [self setReachabilityStatusChangeBlock:^(AFNetworkReachabilityStatus status) {
+        [self.reachabilityManager setReachabilityStatusChangeBlock:^(AFNetworkReachabilityStatus status) {
             weakSelf.operationQueue.suspended = (status == AFNetworkReachabilityStatusNotReachable) || (status == AFNetworkReachabilityStatusUnknown);
         }];
     }
@@ -96,7 +92,7 @@ static NSString *_redirectUrl;
 - (void)postTokenWithParameters:(NSDictionary *)parameters
                         success:(void (^)(AFHTTPRequestOperation *operation, id responseObject))success
                         failure:(void (^)(AFHTTPRequestOperation *operation, NSError *error))failure {
-    [self postPath:@"/token" parameters:parameters success:^(AFHTTPRequestOperation *operation, id responseObject) {
+    [self POST:@"/token" parameters:parameters success:^(AFHTTPRequestOperation *operation, id responseObject) {
         NSString *accessToken = responseObject[@"access_token"];
         NSString *refreshToken = responseObject[@"refresh_token"];
 

@@ -2,11 +2,10 @@
 //  HDKHTTPClient.m
 //  HuddleKit
 //
-//  Copyright (c) 2014 Huddle. All rights reserved.
+//  Copyright (c) 2015 Huddle. All rights reserved.
 //
 
 #import "HDKHTTPClient.h"
-#import "HDKAFJSONRequestOperation.h"
 #import "HDKLoginHTTPClient.h"
 #import "HDKSession.h"
 
@@ -30,14 +29,18 @@ NSString *const HDKInvalidRefreshTokenNotification = @"HDKInvalidRefreshTokenNot
 - (id)initWithBaseURL:(NSURL *)url {
     self = [super initWithBaseURL:url];
     if (self != nil) {
-        [self registerHTTPOperationClass:[HDKAFJSONRequestOperation class]];
-        [self setDefaultHeader:@"Accept" value:@"application/json"];
-        [self setDefaultHeader:@"Content-Type" value:@"application/json"];
-        [self setDefaultHeader:@"X-Client-App" value:_clientId];
-        [self setParameterEncoding:AFJSONParameterEncoding];
+        self.requestSerializer = [[AFJSONRequestSerializer alloc] init];
+        [self.requestSerializer setValue:@"application/json" forHTTPHeaderField:@"Accept"];
+        [self.requestSerializer setValue:_clientId forHTTPHeaderField:@"X-Client-App"];
+
+        AFJSONResponseSerializer *jsonResponseSerializer = [AFJSONResponseSerializer serializer];
+        jsonResponseSerializer.acceptableContentTypes = [NSSet setWithObjects:@"application/json", @"text/json", @"text/javascript", @"application/vnd.huddle.data.v2+json", nil];
+        AFHTTPResponseSerializer *httpResponseSerializer = [[AFHTTPResponseSerializer alloc] init];
+        self.responseSerializer = [AFCompoundResponseSerializer compoundSerializerWithResponseSerializers:@[jsonResponseSerializer, httpResponseSerializer]];
+
         [self setAuthorizationHeaderWithToken:[[HDKSession sharedSession] accessToken]];
         __weak HDKHTTPClient *weakSelf = self;
-        [self setReachabilityStatusChangeBlock:^(AFNetworkReachabilityStatus status) {
+        [self.reachabilityManager setReachabilityStatusChangeBlock:^(AFNetworkReachabilityStatus status) {
             weakSelf.operationQueue.suspended = (status == AFNetworkReachabilityStatusNotReachable) || (status == AFNetworkReachabilityStatusUnknown);
         }];
     }
@@ -67,18 +70,36 @@ NSString *const HDKInvalidRefreshTokenNotification = @"HDKInvalidRefreshTokenNot
                                                    filePath:(NSString *)filePath
                                                     success:(void (^)(AFHTTPRequestOperation *operation, id responseObject))success
                                                     failure:(void (^)(AFHTTPRequestOperation *operation, NSError *error))failure {
+    NSURLRequest * (^redirectResponse)(NSURLConnection *, NSURLRequest *, NSURLResponse *) = ^(NSURLConnection *connection, NSURLRequest *request, NSURLResponse *redirectResponse) {
+        if (redirectResponse) {
+            NSMutableURLRequest *urlRequest = [[NSMutableURLRequest alloc] initWithURL:request.URL];
+            [urlRequest setValue:[connection.originalRequest valueForHTTPHeaderField:@"Authorization"] forHTTPHeaderField:@"Authorization"];
+            for (NSString *header in [[connection.originalRequest allHTTPHeaderFields] keyEnumerator]) {
+                [urlRequest setValue:[connection.originalRequest valueForHTTPHeaderField:header] forHTTPHeaderField:header];
+            }
+
+            return (NSURLRequest *)urlRequest;
+        } else {
+            return request;
+        }
+    };
+
     void (^refreshTokenFailure)(AFHTTPRequestOperation *operation, NSError *error) = ^(AFHTTPRequestOperation *operation, NSError *error) {
         BOOL isAnApiV1AuthenticationError = [self isAnApiV1AuthenticationError:operation];
         NSString *authFailHeader = [[operation response] allHeaderFields][@"Www-Authenticate"];
         if ((authFailHeader && [authFailHeader rangeOfString:@"invalid_token"].location != NSNotFound) || isAnApiV1AuthenticationError) {
             [self refreshAccessTokenWithSuccess:^(AFHTTPRequestOperation *refreshOperation, id responseObject) {
                 NSMutableURLRequest *mutableUrlRequest = (NSMutableURLRequest *)urlRequest;
-                [mutableUrlRequest setValue:[self defaultValueForHeader:@"Authorization"] forHTTPHeaderField:@"Authorization"];
+                NSString *authorizationHeader = [self.requestSerializer valueForHTTPHeaderField:@"Authorization"];
+                [mutableUrlRequest setValue:authorizationHeader forHTTPHeaderField:@"Authorization"];
                 AFHTTPRequestOperation *httpRequestOperation = [super HTTPRequestOperationWithRequest:mutableUrlRequest success:success failure:failure];
+                NSString *acceptHeader = [urlRequest valueForHTTPHeaderField:@"Accept"];
+                [httpRequestOperation setRedirectResponseBlock:redirectResponse];
+
                 if (filePath) {
                     httpRequestOperation.outputStream = [NSOutputStream outputStreamToFileAtPath:filePath append:NO];
                 }
-                [self enqueueHTTPRequestOperation:httpRequestOperation];
+                [self.operationQueue addOperation:httpRequestOperation];
             } failure:failure];
         } else {
             if (failure) {
@@ -87,7 +108,11 @@ NSString *const HDKInvalidRefreshTokenNotification = @"HDKInvalidRefreshTokenNot
         }
     };
 
-    return [super HTTPRequestOperationWithRequest:urlRequest success:success failure:refreshTokenFailure];
+    AFHTTPRequestOperation *httpRequestOperation = [super HTTPRequestOperationWithRequest:urlRequest success:success failure:refreshTokenFailure];
+    NSString *acceptHeader = [urlRequest valueForHTTPHeaderField:@"Accept"];
+    [httpRequestOperation setRedirectResponseBlock:redirectResponse];
+
+    return httpRequestOperation;
 }
 
 - (void)refreshAccessTokenWithSuccess:(void (^)(AFHTTPRequestOperation *operation, id responseObject))success
@@ -110,7 +135,7 @@ NSString *const HDKInvalidRefreshTokenNotification = @"HDKInvalidRefreshTokenNot
 }
 
 - (void)setAuthorizationHeaderWithToken:(NSString *)token {
-    [self setDefaultHeader:@"Authorization" value:[NSString stringWithFormat:@"OAuth2 %@", token]];
+    [self.requestSerializer setValue:[NSString stringWithFormat:@"OAuth2 %@", token] forHTTPHeaderField:@"Authorization"];
 }
 
 #pragma mark - Private methods
@@ -142,8 +167,7 @@ NSString *const HDKInvalidRefreshTokenNotification = @"HDKInvalidRefreshTokenNot
 }
 
 - (BOOL)operation:(AFHTTPRequestOperation *)operation containsError:(NSString *)error {
-    HDKAFJSONRequestOperation *jsonRequestOperation = (HDKAFJSONRequestOperation *)operation;
-    id responseJSON = [jsonRequestOperation responseJSON];
+    id responseJSON = [operation responseObject];
     NSString *errorURI = responseJSON[@"error_uri"];
 
     if (errorURI) {

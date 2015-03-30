@@ -2,7 +2,7 @@
 //  HDKSession.h
 //  HuddleKit
 //
-//  Copyright (c) 2014 Huddle. All rights reserved.
+//  Copyright (c) 2015 Huddle. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>

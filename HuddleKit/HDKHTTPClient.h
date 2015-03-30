@@ -2,15 +2,15 @@
 //  HDKHTTPClient.h
 //  HuddleKit
 //
-//  Copyright (c) 2014 Huddle. All rights reserved.
+//  Copyright (c) 2015 Huddle. All rights reserved.
 //
 
-#import "AFHTTPClient.h"
+#import <AFNetworking/AFHTTPRequestOperationManager.h>
 
 extern NSString *const HDKUserAccessGrantRevokedNotification;
 extern NSString *const HDKInvalidRefreshTokenNotification;
 
-@interface HDKHTTPClient : AFHTTPClient
+@interface HDKHTTPClient : AFHTTPRequestOperationManager
 
 + (HDKHTTPClient *)sharedClient;
 
@@ -23,5 +23,6 @@ extern NSString *const HDKInvalidRefreshTokenNotification;
                                                     failure:(void (^)(AFHTTPRequestOperation *operation, NSError *error))failure;
 - (void)refreshAccessTokenWithSuccess:(void (^)(AFHTTPRequestOperation *operation, id responseObject))success
                               failure:(void (^)(AFHTTPRequestOperation *operation, NSError *error))failure;
+- (void)setAuthorizationHeaderWithToken:(NSString *)token;
 
 @end

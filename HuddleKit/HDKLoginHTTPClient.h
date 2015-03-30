@@ -2,12 +2,12 @@
 //  HDKLoginHTTPClient.h
 //  HuddleKit
 //
-//  Copyright (c) 2014 Huddle. All rights reserved.
+//  Copyright (c) 2015 Huddle. All rights reserved.
 //
 
-#import "AFHTTPClient.h"
+#import <AFNetworking/AFHTTPRequestOperationManager.h>
 
-@interface HDKLoginHTTPClient : AFHTTPClient
+@interface HDKLoginHTTPClient : AFHTTPRequestOperationManager
 
 + (HDKLoginHTTPClient *)sharedClient;
 

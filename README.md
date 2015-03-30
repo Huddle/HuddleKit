@@ -13,14 +13,6 @@ Using [CocoaPods](http://cocoapods.org) add the following line to your `Podfile`
 pod 'HuddleKit', :git => 'https://github.com/Huddle/HuddleKit.git'
 ````
 
-### Add HuddleKit.h to your project's -Prefix.pch file
-
-```objc
-#import <SystemConfiguration/SystemConfiguration.h>
-#import <MobileCoreServices/MobileCoreServices.h>
-#import "HuddleKit.h"
-```
-
 ### Set your API Client Id and Redirect URL
 
 Inside your project's `AppDelegate.m`, add the following to the end of the `application:didFinishLaunchingWithOptions:` method, replacing with the values obtained after [registering for an API key](https://login.huddle.net/docs/index.html):
