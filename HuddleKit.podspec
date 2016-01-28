@@ -1,11 +1,11 @@
 Pod::Spec.new do |s|
   s.name         = 'HuddleKit'
-  s.version      = '1.0.7'
+  s.version      = '1.0.8'
   s.summary      = 'An iOS library for accessing the Huddle API.'
   s.homepage     = 'http://github.com/Huddle/HuddleKit'
   s.license      = 'MIT'
   s.author       = { "Pete O'Grady" => 'pete.ogrady@huddle.com' }
-  s.source       = { :git => 'http://github.com/Huddle/HuddleKit.git', :tag => '1.0.7' }
+  s.source       = { :git => 'http://github.com/Huddle/HuddleKit.git', :tag => '1.0.8' }
   s.platform     = :ios, '5.0'
   s.source_files = 'HuddleKit'
   s.frameworks = 'Security'

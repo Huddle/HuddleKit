@@ -9,6 +9,7 @@
 
 extern NSString *const HDKUserAccessGrantRevokedNotification;
 extern NSString *const HDKInvalidRefreshTokenNotification;
+extern NSString *const HDKInvalidClientNotification;
 
 @interface HDKHTTPClient : AFHTTPClient
 

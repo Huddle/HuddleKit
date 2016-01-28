@@ -14,6 +14,7 @@ static NSString *_apiBaseUrl = @"https://api.huddle.net";
 static NSString *_clientId;
 NSString *const HDKUserAccessGrantRevokedNotification = @"HDKUserAccessGrantRevokedNotification";
 NSString *const HDKInvalidRefreshTokenNotification = @"HDKInvalidRefreshTokenNotification";
+NSString *const HDKInvalidClientNotification = @"HDKInvalidClientNotification";
 
 @implementation HDKHTTPClient
 
@@ -103,6 +104,9 @@ NSString *const HDKInvalidRefreshTokenNotification = @"HDKInvalidRefreshTokenNot
             [self postUserAccessGrantRevokedNotification];
         } else if ([self isAnInvalidRefreshTokenError:refreshOperation]) {
             [self postInvalidRefreshTokenNotification];
+        } else if ([self isAClientError:refreshOperation]) {
+            NSString *errorMessage = [self errorMessageFromOperation:refreshOperation];
+            [self postInvalidClientNotification:errorMessage];
         } else if (failure) {
             failure(refreshOperation, refreshError);
         }
@@ -137,8 +141,16 @@ NSString *const HDKInvalidRefreshTokenNotification = @"HDKInvalidRefreshTokenNot
     return [self operation:operation containsError:@"InvalidRefreshToken"];
 }
 
+- (BOOL)isAClientError:(AFHTTPRequestOperation *)operation {
+    return [self operation:operation containsError:@"ClientForbidden"] || [self operation:operation containsError:@"ClientDisabled"];
+}
+
 - (void)postInvalidRefreshTokenNotification {
     [[NSNotificationCenter defaultCenter] postNotificationName:HDKInvalidRefreshTokenNotification object:nil];
+}
+
+- (void)postInvalidClientNotification:(NSString *)errorMessage {
+    [[NSNotificationCenter defaultCenter] postNotificationName:HDKInvalidClientNotification object:errorMessage];
 }
 
 - (BOOL)operation:(AFHTTPRequestOperation *)operation containsError:(NSString *)error {
@@ -154,6 +166,14 @@ NSString *const HDKInvalidRefreshTokenNotification = @"HDKInvalidRefreshTokenNot
     }
 
     return NO;
+}
+
+- (NSString *)errorMessageFromOperation:(AFHTTPRequestOperation *)operation {
+    HDKAFJSONRequestOperation *jsonRequestOperation = (HDKAFJSONRequestOperation *)operation;
+    id responseJSON = [jsonRequestOperation responseJSON];
+    NSString *errorMessage = responseJSON[@"error_description"];
+
+    return errorMessage;
 }
 
 @end
